@@ -1,0 +1,132 @@
+name: KinkAcademy
+
+sceneByURL:
+  - action: scrapeXPath
+    url:
+      - www.kinkacademy.com
+    scraper: sceneScraper
+
+sceneByName:
+  action: scrapeXPath
+  queryURL: https://www.kinkacademy.com/?s={}
+  scraper: sceneSearch
+
+sceneByQueryFragment:
+  action: scrapeXPath
+  queryURL: "{url}"
+  queryURLReplace:
+    filename:
+      # e.g. KA_Savannah_AnalPlayEssentials_750.mp4 -> Savannah_AnalPlayEssentials
+      - regex: '^(KA|ka)_(\w+)_(\w+).*'
+        with: "$1_$2"
+  scraper: sceneScraper
+
+performerByURL:
+  - action: scrapeXPath
+    url:
+      - www.kinkacademy.com/instructor/
+    scraper: performerScraper
+
+performerByName:
+  action: scrapeXPath
+  queryURL: https://www.kinkacademy.com/?s="{}"
+  scraper: performerSearch
+
+movieByURL:
+  - action: scrapeXPath
+    url:
+      - www.kinkacademy.com/series/
+    scraper: groupScraper
+
+xPathScrapers:
+  sceneSearch:
+    common:
+      $post: //article[contains(concat(" ", normalize-space(@class), " "), " post ")]
+    scene:
+      Title: $post/div[@class="entry-content"]//a[@rel="bookmark"]/text()
+      URL: $post/div[@class="entry-content"]//a[@rel="bookmark"]/@href
+      Image: $post//figure//img/@src
+    performer:
+      Name: $post/header//a[@rel="bookmark"]/text()
+      URL: $post/header//a[@rel="bookmark"]/@href
+    movie:
+      Name: $post/footer//span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/text()
+      URL: $post/footer//span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/@href
+
+  sceneScraper:
+    scene:
+      Title: //head/meta[@property="og:title"]/@content
+      Code:
+        selector: //head/link[@rel="alternate" and @type="application/json"]/@href
+        postProcess:
+          - replace:
+              - regex: '^https:\/\/www.kinkacademy.com\/wp-json\/wp\/v2\/posts\/(\d+)$'
+                with: "$1"
+      Date:
+        selector: //head/meta[@property="article:published_time"]/@content
+        postProcess:
+          # Format: 2010-09-09T14:00:31+00:00
+          - parseDate: "2006-01-02T15:04:05+00:00"
+      Movies:
+        Name: //span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/text()
+        URL: //span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/@href
+      Studio:
+        Name: //head/meta[@property="og:site_name"]/@content
+      Performers:
+        Name: //span[@class="post-instructors"]/span[@class="terms"]/a[@rel="bookmark"]/text()
+        URL: //span[@class="post-instructors"]/span[@class="terms"]/a[@rel="bookmark"]/@href
+      Tags:
+        Name: //span[@class="categories" or @class="skill-level"]/span[@class="terms"]/a[@rel="tag"]
+      Details:
+        selector: //div[@class="entry-content"]/text()
+        concat: "\n\n"
+      Image: //head/meta[@property="og:image"]/@content
+      URL: //head/link[@rel="canonical"]/@href
+
+  performerSearch:
+    common:
+      $instructor: //article[contains(concat(" ", normalize-space(@class), " "), " instructor ")]
+    performer:
+      Name: $instructor//a[@rel="bookmark"]/text()
+      URL: $instructor//a[@rel="bookmark"]/@href
+      Image: $instructor//figure//img/@src
+
+  performerScraper:
+    performer:
+      Name: //head/meta[@property="og:title"]/@content
+      Tags:
+        Name:
+          fixed: Instructor
+      Details:
+        # not ideal for links, but alas..
+        selector: //section[@class="content-primary"]//text()
+        concat: "\n\n"
+      Twitter:
+        selector: //div[@class="instructor-social"]//a[contains(@href, "twitter.com")]/@href]
+      Image: //head/meta[@property="og:image"]/@content
+      URL:
+        # Typo on purpose: websote
+        selector: //div[@class="instructor-social"]//span[@aria-labelledby="websote"]/a/@href
+
+  groupScraper:
+    movie:
+      Name: //head/meta[@property="og:title"]/@content
+      FrontImage: //head/meta[@property="og:image"]/@content
+      Studio:
+        Name: //head/meta[@property="og:site_name"]/@content
+      Synopsis:
+        selector: //div[@class="series-info"]//text()
+        concat: "\n\n"
+      Tags:
+        Name: //span[@class="categories" or @class="skill-level"]/span[@class="terms"]/a[@rel="tag"]
+      URL: //head/link[@rel="canonical"]/@href
+
+driver:
+  useCDP: false
+  cookies:
+    - CookieURL: "https://www.kinkacademy.com"
+      Cookies:
+        - Name: "age_gate"
+          Domain: "www.kinkacademy.com"
+          Value: "18"
+          Path: "/"
