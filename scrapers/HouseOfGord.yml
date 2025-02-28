@@ -18,7 +18,7 @@ xPathScrapers:
                 with: $1
           - parseDate: 02 Jan 2006
       Details:
-        selector: //p[@class="preview_description"]/text()
+        selector: //p[@class="preview_description"]/text()|//div[@class="detail_description"]//p/text()
         concat: "\n\n"
       Performers:
         Name:
