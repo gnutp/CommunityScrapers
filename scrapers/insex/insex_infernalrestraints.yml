@@ -1,0 +1,61 @@
+name: Infernal Restraints
+
+sceneByName:
+  action: scrapeXPath
+  queryURL: https://www.infernalrestraints.com/ir/home.php?s={}&o=newest
+  scraper: sceneSearch
+
+sceneByQueryFragment:
+  action: script
+  script:
+    - python
+    - insex.py
+
+xPathScrapers:
+  sceneSearch:
+    common:
+      $scene: //figure[@class="image"]/parent::*
+    scene:
+      Title: $scene/div/div/text()
+      Details:
+        selector: $scene//div[@class=""]
+        postProcess:
+          - replace:
+              - regex: \d{4}-\d{2}-\d{2}
+                with: # remove date so that only performers are displayed
+      #Title:
+      #  selector: $scene//*[normalize-space(text())]/text()
+      #  concat: " - "
+      Image: $scene/figure//img/@src
+      Date: $scene//span/text()
+      # Disabled due to bug in search with array handling where each result displays all peformeners
+      #Performers:
+      #Name: $scene//a/text()
+      #Name:
+      #  selector: $scene//div[@class=""]
+      #  postProcess:
+      #    - replace:
+      #        - regex: \d{4}-\d{2}-\d{2}
+      #          with:
+      #    - javascript: |
+      #        if (value && Array.isArray(value)) {
+      #          return value.map(n => n.trim().split(/[\n\t]+/));
+      #        }
+
+      URL:
+        selector: $scene/figure//a/@href
+        postProcess:
+          - replace:
+              - regex: ^
+                with: https://www.infernalrestraints.com/ir/ # add base URL
+              - regex: "&s=.*$"
+                with: # remove search term
+
+driver:
+  cookies:
+    - CookieURL: "https://infernalrestraints.com"
+      Cookies:
+        - Name: "consent"
+          Value: "yes"
+          Domain: "infernalrestraints.com"
+          Path: "/"
