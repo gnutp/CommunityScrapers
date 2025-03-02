@@ -1,0 +1,44 @@
+name: Insex On Demand
+
+sceneByName:
+  action: scrapeXPath
+  queryURL: https://www.insexondemand.com/iod/home.php?s={}&o=newest
+  scraper: sceneSearch
+
+sceneByQueryFragment:
+  action: script
+  script:
+    - python
+    - insex.py
+
+xPathScrapers:
+  sceneSearch:
+    common:
+      $scene: //figure[@class="image"]/parent::*
+    scene:
+      Title: $scene/div/div/text()
+      Details:
+        selector: $scene//div[@class=""]
+        postProcess:
+          - replace:
+              - regex: \d{4}-\d{2}-\d{2}
+                with: # remove date so that only performers are displayed
+      Image: $scene/figure//img/@src
+      Date: $scene//span/text()
+      URL:
+        selector: $scene/figure//a/@href
+        postProcess:
+          - replace:
+              - regex: ^
+                with: https://www.insexondemand.com/iod/ # add base URL
+              - regex: "&s=.*$"
+                with: # remove search term
+
+driver:
+  cookies:
+    - CookieURL: "https://insexondemand.com"
+      Cookies:
+        - Name: "consent"
+          Value: "yes"
+          Domain: "insexondemand.com"
+          Path: "/"
