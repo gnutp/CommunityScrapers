@@ -1,0 +1,55 @@
+name: Insex Archives
+
+sceneByURL:
+  - action: scrapeXPath
+    url:
+      - insexarchives.com/blog
+    scraper: sceneScraper
+
+sceneByName:
+  action: scrapeXPath
+  queryURL: http://www.insexarchives.com/blog/?s={}
+  scraper: sceneSearch
+
+sceneByQueryFragment:
+  action: scrapeXPath
+  queryURL: "{url}"
+  scraper: sceneScraper
+
+xPathScrapers:
+  sceneScraper:
+    common: &commonSelectors
+      $post: //div[@class="post"]
+    scene:
+      Title: &titleSelector $post//h2/a[@rel="bookmark"]/text()
+      URL: &urlSelector $post//h2/a[@rel="bookmark"]/@href
+      Image: &imageSelector $post//img/@src
+      Code:
+        selector: $post/@id
+        postProcess:
+          - replace:
+              - regex: ^\w+-(\d+)$
+                with: $1
+      Details: $post//div[@class="entry clear"]/p[1]
+      # Expect a year in the tags between 1997-2005
+      Date: &dateSelector $post//a[@rel="tag" and (number(text()) >= 1997) and (number(text()) <= 2005)]
+      # Expect Insex model number, e.g. 912.
+      # Not 100% accurate as some models are named in the tags.
+      Performers:
+        Name: $post//a[@rel="tag" and number(text()) < 1997]
+      Tags:
+        Name: $post//a[@rel="tag"]
+      Studio:
+        Name:
+          fixed: Insex (1997-2005)
+
+  sceneSearch:
+    common: *commonSelectors
+    scene:
+      Title: *titleSelector
+      # Display tags instead of actual details. Because the tags also contain the
+      # models this is more useful in the search results.
+      Details: $post//h3[@class="tags"]/span
+      Date: *dateSelector
+      Image: *imageSelector
+      URL: *urlSelector
