@@ -1,0 +1,135 @@
+name: Lovingly Handmade Pornography
+
+sceneByURL:
+  - action: scrapeXPath
+    url:
+      - lovinglyhandmadepornography.com/detail
+    scraper: sceneScraper
+
+sceneByName:
+  action: script
+  script:
+    - python
+    - sitemap.py
+    - https://lovinglyhandmadepornography.com
+    - detail/
+    - scene-by-name
+
+sceneByQueryFragment:
+  action: scrapeXPath
+  queryURL: "{url}"
+  scraper: sceneScraper
+
+sceneByFragment:
+  action: scrapeXPath
+  queryURL: https://lovinglyhandmadepornography.com/detail/{filename}
+  queryURLReplace:
+    filename:
+      # e.g. LovinglyHandmadePornography - Nowhere for Her Head to Go 13.04.19.mp4
+      - regex: '(?i)^lovinglyhandmadepornography - ([\w\s]+) (\d{2}\.\d{2}\.\d{2}).*$'
+        with: $1
+      - regex: ([^\w\s])
+        with: # remove special chars
+      - regex: (\w)
+        # TODO: \L not implemented in Go
+        with: "\L$1" # lowercase
+      - regex: (\s)
+        with: "-" # slugify
+  scraper: sceneScraper
+
+movieByURL:
+  - action: scrapeXPath
+    url:
+      - lovinglyhandmadepornography.com/detail
+    scraper: groupScraper
+
+performerByURL:
+  - action: script
+    url:
+      - lovinglyhandmadepornography.com/tagged
+    script:
+      - python
+      - noop.py
+
+performerByName:
+  action: script
+  script:
+    - python
+    - sitemap.py
+    - https://lovinglyhandmadepornography.com
+    - tagged/
+    - performer-by-name
+
+xPathScrapers:
+  sceneScraper:
+    common: &common # Date info contains Updated, Published, Filmed
+      $dates: //div[text()[contains(.,"Published:")]]
+      $group: //div[text()[contains(.,"Part of")]]/parent::div
+    scene:
+      Title: //h1
+      Date:
+        selector: $dates
+        postProcess:
+          - replace:
+              - regex: "^.*Published: (\\d{4}-\\d{2}-\\d{2}).*$"
+                with: $1
+      Movies:
+        Name: &groupName
+          selector: $group/div[1]
+          postProcess:
+            - replace:
+                - regex: "^Part of '(\\w+)':$"
+                  with: $1
+        URL: &groupUrl # Use first scene in group as canonical URL
+          selector: $group//div[@class="m-2.5"][1]/a/@href
+          postProcess: &baseUrl
+            - replace:
+                - regex: ^
+                  with: https://lovinglyhandmadepornography.com # add base URL
+        # TODO: Add index if supported: https://github.com/stashapp/stash/issues/4089
+      Studio: &studio
+        Name:
+          fixed: Lovingly Handmade Pornography
+      Performers: # First tag is the performeer name
+        Name: //a[@rel="tag"][1]
+        Disambiguation: Lovingly Handmade Pornography
+        URL:
+          selector: //a[@rel="tag"][1]/@href
+          postProcess: *baseUrl
+      Tags:
+        Name: //a[@rel="tag"][position() > 1]
+      Details: //div[contains(concat(" ", normalize-space(@class), " "), " prose ")]
+      # TODO: 403 on retrieve
+      #Image: //div[@id="video_container"]/video/@poster
+      URL: //head/link[@rel="canonical"]/@href
+
+  groupScraper:
+    common: *common
+    movie:
+      Name: *groupName
+      Date:
+        selector: $dates
+        postProcess:
+          - replace:
+              - regex: "^.*Filmed: (\\d{4}-\\d{2}-\\d{2}).*$"
+                with: $1
+      # Use image of first scene in group
+      # TODO: 403 on retrieve
+      # FrontImage: $group//div[@class="m-2.5"][1]//img/@src
+      Studio: *studio
+      URL: *groupUrl
+
+driver:
+  useCDP: true
+  headers:
+    - Key: Referer
+      Value: https://lovinglyhandmadepornography.com/
+    - Key: User-Agent
+      Value: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36
+  cookies:
+    - # CookieURL: "https://lovinglyhandmadepornography.com"
+      Cookies:
+        - Name: "legal_accepted2"
+          Domain: "lovinglyhandmadepornography.com"
+          Value: "yes"
+          Path: "/"
