@@ -68,17 +68,17 @@ xPathScrapers:
             - replace:
                 - regex: "^Part of '(\\w+)':$"
                   with: $1
-        URL: &groupUrl # Use first scene in group as canonical URL
+        URL: # Use first scene in group as canonical URL
           selector: $group//div[@class="m-2.5"][1]/a/@href
           postProcess: &baseUrl
             - replace:
                 - regex: ^
-                  with: https://lovinglyhandmadepornography.com # add base URL
+                  with: https://lovinglyhandmadepornography.com
         # TODO: Add index if supported: https://github.com/stashapp/stash/issues/4089
       Studio: &studio
         Name:
           fixed: Lovingly Handmade Pornography
-      Performers: # First tag is the performeer name
+      Performers: # First tag is the performer name
         Name: //a[@rel="tag"][1]
         Disambiguation: Lovingly Handmade Pornography
         URL:
@@ -105,7 +105,9 @@ xPathScrapers:
       # TODO: 403 on retrieve
       # FrontImage: $group//div[@class="m-2.5"][1]//img/@src
       Studio: *studio
-      URL: *groupUrl
+      URLs: # Since there is no dedicated group page, use URLs of each individual scenes, in order
+        selector: $group//div[@class="m-2.5"]/a/@href
+        postProcess: *baseUrl
 
 driver:
   useCDP: true
