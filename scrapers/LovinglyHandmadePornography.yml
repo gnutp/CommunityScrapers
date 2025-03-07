@@ -22,19 +22,7 @@ sceneByQueryFragment:
 
 sceneByFragment:
   action: scrapeXPath
-  queryURL: https://lovinglyhandmadepornography.com/detail/{filename}
-  queryURLReplace:
-    filename:
-      # e.g. LovinglyHandmadePornography - Nowhere for Her Head to Go 13.04.19.mp4
-      - regex: '(?i)^lovinglyhandmadepornography - ([\w\s]+) (\d{2}\.\d{2}\.\d{2}).*$'
-        with: $1
-      - regex: ([^\w\s])
-        with: # remove special chars
-      - regex: (\w)
-        # TODO: \L not implemented in Go
-        with: "\L$1" # lowercase
-      - regex: (\s)
-        with: "-" # slugify
+  queryURL: "{url}"
   scraper: sceneScraper
 
 movieByURL:
