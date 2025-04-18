@@ -52,6 +52,7 @@ xPathScrapers:
         selector: //p[@class="preview_description"]/text()|//div[@class="detail_description"]//p/text()
         concat: "\n\n"
       Performers: &scenePerformers
+        Disambiguation: House of Gord
         Name:
           selector: //div[@class="preview_facets_listing"]/a[not(preceding-sibling::br)]/text()
       Tags: &sceneTags
