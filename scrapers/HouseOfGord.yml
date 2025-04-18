@@ -20,36 +20,50 @@ sceneByQueryFragment:
   queryURL: "{url}"
   scraper: sceneScraper
 
+galleryByURL:
+  - action: scrapeXPath
+    url:
+      - houseofgord.com/d
+    scraper: galleryScraper
+
 xPathScrapers:
   sceneScraper:
     scene:
-      Title:
+      Title: &sceneTitle
         selector: //head/title
         postProcess:
           - replace:
               - regex: "\\s*\\| House of Gord$"
                 with: ""
-      Date:
+      Date: &sceneDate
         selector: //div[contains(concat(" ", normalize-space(@class), " "), "preview_feature_date")][contains(text(),"Video")]/text()|//div[@class="preview_feature_date"][1]/text()
         postProcess:
           - replace:
               - regex: .*\s+added\s+(.*)
                 with: $1
           - parseDate: 02 Jan 2006
-      Details:
+      Details: &sceneDetails
         selector: //p[@class="preview_description"]/text()|//div[@class="detail_description"]//p/text()
         concat: "\n\n"
-      Performers:
+      Performers: &scenePerformers
         Name:
           selector: //div[@class="preview_facets_listing"]/a[not(preceding-sibling::br)]/text()
-      Tags:
+      Tags: &sceneTags
         Name:
           selector: //div[@class="preview_facets_listing"]/a[preceding-sibling::br]/text()
-      Studio:
+      Studio: &sceneStudio
         Name:
           fixed: House of Gord
-      Image:
+      Image: &sceneImage
         selector: //video[@id="0"]/@poster|//td[@class="previewpic_item" and @style="width:53%"][1]/img/@src|//td[@class="previewpic_item"][1]/img/@src
+
+  galleryScraper:
+    gallery:
+      Date: *sceneDate
+      Performers: *scenePerformers
+      Studio: *sceneStudio
+      Tags: *sceneTags
+      Title: *sceneTitle
 
 driver:
   useCDP: true
