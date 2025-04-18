@@ -5,6 +5,21 @@ sceneByURL:
       - houseofgord.com/d
     scraper: sceneScraper
 
+sceneByName:
+  action: script
+  script:
+    - python
+    - sitemap.py
+    # uses local version of sitemap due to cloudflare block
+    - https://houseofgord.com
+    - d/
+    - scene-by-name
+
+sceneByQueryFragment:
+  action: scrapeXPath
+  queryURL: "{url}"
+  scraper: sceneScraper
+
 xPathScrapers:
   sceneScraper:
     scene:
