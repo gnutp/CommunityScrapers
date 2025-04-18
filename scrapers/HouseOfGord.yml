@@ -26,6 +26,12 @@ galleryByURL:
       - houseofgord.com/d
     scraper: galleryScraper
 
+movieByURL:
+  - action: scrapeXPath
+    url:
+      - houseofgord.com/d
+    scraper: groupScraper
+
 xPathScrapers:
   sceneScraper:
     scene:
@@ -64,6 +70,18 @@ xPathScrapers:
       Studio: *sceneStudio
       Tags: *sceneTags
       Title: *sceneTitle
+
+  groupScraper:
+    movie:
+      #Name: *sceneTitle
+      #Name:
+      #  selector: //video[@id="0"]/source/@src
+      #  postProcess:
+      Date: *sceneDate
+      Studio: *sceneStudio
+      Aliases: *sceneTitle
+      FrontImage: *sceneImage
+      Synopsis: *sceneDetails
 
 driver:
   useCDP: true
