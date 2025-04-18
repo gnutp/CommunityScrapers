@@ -24,7 +24,11 @@ xPathScrapers:
   sceneScraper:
     scene:
       Title:
-        selector: //div[@id="detail_title"]/text()
+        selector: //head/title
+        postProcess:
+          - replace:
+              - regex: "\\s*\\| House of Gord$"
+                with: ""
       Date:
         selector: //div[contains(concat(" ", normalize-space(@class), " "), "preview_feature_date")][contains(text(),"Video")]/text()|//div[@class="preview_feature_date"][1]/text()
         postProcess:
