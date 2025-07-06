@@ -53,3 +53,6 @@ xPathScrapers:
       Date: *dateSelector
       Image: *imageSelector
       URL: *urlSelector
+
+driver:
+  useCDP: true
