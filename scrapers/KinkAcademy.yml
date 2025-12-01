@@ -32,7 +32,7 @@ performerByName:
   queryURL: https://www.kinkacademy.com/?s="{}"
   scraper: performerSearch
 
-movieByURL:
+groupByURL:
   - action: scrapeXPath
     url:
       - www.kinkacademy.com/series/
@@ -48,8 +48,8 @@ xPathScrapers:
       Image: $post//figure//img/@src
     performer:
       Name: $post/header//a[@rel="bookmark"]/text()
-      URL: $post/header//a[@rel="bookmark"]/@href
-    movie:
+      URLs: $post/header//a[@rel="bookmark"]/@href
+    group:
       Name: $post/footer//span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/text()
       URL: $post/footer//span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/@href
 
@@ -67,14 +67,14 @@ xPathScrapers:
         postProcess:
           # Format: 2010-09-09T14:00:31+00:00
           - parseDate: "2006-01-02T15:04:05+00:00"
-      Movies:
+      Groups:
         Name: //span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/text()
         URL: //span[@class="series"]/span[@class="terms"]/a[@rel="tag"]/@href
       Studio:
         Name: //head/meta[@property="og:site_name"]/@content
       Performers:
         Name: //span[@class="post-instructors"]/span[@class="terms"]/a[@rel="bookmark"]/text()
-        URL: //span[@class="post-instructors"]/span[@class="terms"]/a[@rel="bookmark"]/@href
+        URLs: //span[@class="post-instructors"]/span[@class="terms"]/a[@rel="bookmark"]/@href
       Tags:
         Name: //span[@class="categories" or @class="skill-level"]/span[@class="terms"]/a[@rel="tag"]
       Details:
@@ -88,7 +88,7 @@ xPathScrapers:
       $instructor: //article[contains(concat(" ", normalize-space(@class), " "), " instructor ")]
     performer:
       Name: $instructor//a[@rel="bookmark"]/text()
-      URL: $instructor//a[@rel="bookmark"]/@href
+      URLs: $instructor//a[@rel="bookmark"]/@href
       Image: $instructor//figure//img/@src
 
   performerScraper:
@@ -104,12 +104,12 @@ xPathScrapers:
       Twitter:
         selector: //div[@class="instructor-social"]//a[contains(@href, "twitter.com")]/@href]
       Image: //head/meta[@property="og:image"]/@content
-      URL:
+      URLs:
         # Typo on purpose: websote
         selector: //div[@class="instructor-social"]//span[@aria-labelledby="websote"]/a/@href
 
   groupScraper:
-    movie:
+    group:
       Name: //head/meta[@property="og:title"]/@content
       FrontImage: //head/meta[@property="og:image"]/@content
       Studio:
