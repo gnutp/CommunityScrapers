@@ -25,7 +25,7 @@ sceneByFragment:
   queryURL: "{url}"
   scraper: sceneScraper
 
-movieByURL:
+groupByURL:
   - action: scrapeXPath
     url:
       - lovinglyhandmadepornography.com/detail
@@ -61,7 +61,7 @@ xPathScrapers:
           - replace:
               - regex: "^.*Published: (\\d{4}-\\d{2}-\\d{2}).*$"
                 with: $1
-      Movies:
+      Groups:
         Name: &groupName
           selector: $group/div[1]
           postProcess:
@@ -81,7 +81,7 @@ xPathScrapers:
       Performers: # First tag is the performer name
         Name: //a[@rel="tag"][1]
         Disambiguation: Lovingly Handmade Pornography
-        URL:
+        URLs:
           selector: //a[@rel="tag"][1]/@href
           postProcess: *baseUrl
       Tags:
@@ -93,7 +93,7 @@ xPathScrapers:
 
   groupScraper:
     common: *common
-    movie:
+    group:
       Name: *groupName
       Date:
         selector: $dates
