@@ -42,27 +42,59 @@ xPathScrapers:
               - regex: "\\s*\\| House of Gord$"
                 with: ""
       Date: &sceneDate
-        selector: //div[contains(concat(" ", normalize-space(@class), " "), "preview_feature_date")][contains(text(),"Video")]/text()|//div[@class="preview_feature_date"][1]/text()
+        selector: >-
+          //div[contains(concat(" ", normalize-space(@class), " "), "preview_feature_date")][contains(text(),"Video")]/text()
+          |
+          //div[@class="preview_feature_date"][1]/text()
+          |
+          //div[@class='links_to_pages']/div[contains(text(),'Video')]//text()
         postProcess:
           - replace:
               - regex: .*\s+added\s+(.*)
                 with: $1
           - parseDate: 02 Jan 2006
       Details: &sceneDetails
-        selector: //p[@class="preview_description"]/text()|//div[@class="detail_description"]//p/text()
+        selector: >-
+          //p[@class="preview_description"]/text()
+          |
+          //div[@class="detail_description"]//p/text()
+          |
+          //span[contains(concat(" ", normalize-space(@class), " "), "prose")]/p/text()
         concat: "\n\n"
       Performers: &scenePerformers
         Disambiguation: House of Gord
         Name:
-          selector: //div[@class="preview_facets_listing"]/a[not(preceding-sibling::br)]/text()
+          selector: >-
+            //div[@class="preview_facets_listing"]/a[not(preceding-sibling::br)]/text()
+            |
+            //div[@id="main_content"]//a[contains(@href, '/b/') and not(preceding-sibling::br)]/text()
       Tags: &sceneTags
         Name:
-          selector: //div[@class="preview_facets_listing"]/a[preceding-sibling::br]/text()
+          selector: >-
+            //div[@class="preview_facets_listing"]/a[preceding-sibling::br]/text()
+            |
+            //div[@id="main_content"]//a[contains(@href, '/b/') and preceding-sibling::br]/text()
       Studio: &sceneStudio
         Name:
           fixed: House of Gord
       Image: &sceneImage
-        selector: //video[@id="0"]/@poster|//td[@class="previewpic_item" and @style="width:53%"][1]/img/@src|//td[@class="previewpic_item"][1]/img/@src
+        selector: >-
+          //video[@id="0"]/@poster
+          |
+          //td[@class="previewpic_item" and @style="width:53%"][1]/img/@src
+          |
+          //td[@class="previewpic_item"][1]/img/@src
+          |
+          //td[@style="width:53%"][1]/img/@src
+          |
+          //img[contains(@src, 'preview')][1]/@src
+      Code: *sceneImage
+        #postProcess:
+        #  - regexReplace:
+        #      - regex: .*/(preview|thumbnails)/([a-zA-Z0-9_-]+)\..*
+        #        with: $2
+      URL:
+        fixed: "{inputURL}"
 
   galleryScraper:
     gallery:
