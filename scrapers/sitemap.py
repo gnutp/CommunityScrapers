@@ -7,10 +7,23 @@ on the locations listed in the sitemap of a website.
 
 import json
 import sys
+import os
+
+CURRENT_SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+PARENT_DIR = os.path.dirname(CURRENT_SCRIPT_DIR)
+sys.path.append(PARENT_DIR)
+
+try:
+    import py_common.log as log
+except ModuleNotFoundError:
+    print(
+        "You need to download the folder 'py_common' from the community repo (CommunityScrapers/tree/master/scrapers/py_common)",
+        file=sys.stderr,
+    )
+    sys.exit()
 
 sys.path.append("./community")
 
-import py_common.log as log
 from py_common.cache import cache_to_disk
 from py_common.util import scraper_args
 
@@ -24,7 +37,7 @@ from urllib.request import Request, urlopen
 import difflib
 
 
-@cache_to_disk(key="sitemap", ttl=360)
+@cache_to_disk(ttl=360)
 def parse_sitemap(base_url: str) -> list:
     url = urlparse(base_url)
     sitemap_url = f"{base_url}/sitemap.xml"
@@ -83,7 +96,7 @@ if __name__ == "__main__":
     op, args = scraper_args()
 
     result = None
-    extra = args.get("extra", None)
+    extra = args.get("extra", [])
     site_url = extra[0]
     (filter,) = extra[1:2] or ("",)
 
