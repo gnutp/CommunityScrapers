@@ -8,7 +8,7 @@ on the locations listed in the sitemap of a website.
 import json
 import sys
 
-sys.path.append("./community")
+sys.path.append("./../community")
 
 import py_common.log as log
 from py_common.cache import cache_to_disk
@@ -25,15 +25,14 @@ from pathlib import Path
 import difflib
 
 
-@cache_to_disk(key="sitemap", ttl=360)
+@cache_to_disk(ttl=360)
 def parse_sitemap(base_url: str) -> list:
     url = urlparse(base_url)
-    sitemap = Path(f"{url.hostname}.xml")
+    sitemap = Path(__file__).parent / Path(f"{url.hostname}.xml")
 
-    with sitemap.open() as f:
-        content = f.read_text()
+    tree = etree.parse(sitemap)
+    root = tree.getroot()
 
-    root = etree.fromstring(content)
     namespaces = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
     urls = root.xpath("//ns:loc/text()", namespaces=namespaces)
 
@@ -45,7 +44,7 @@ def normalise(text: str) -> str:
     return text.translate(translation_map).lower()
 
 
-def matches_by_name(name: str, site_url: str, filter: str = ""):
+def matches_by_name(name: str, site_url: str, filter: str = "") -> list[str]:
     """
     Matches a location in the sitemap by name.
 
@@ -79,7 +78,7 @@ if __name__ == "__main__":
     op, args = scraper_args()
 
     result = None
-    extra = args.get("extra", None)
+    extra: list[str] = args.get("extra", [])
     site_url = extra[0]
     (filter,) = extra[1:2] or ("",)
 
